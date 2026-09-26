@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Bot Commands</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap');
+
+        body {
+            background-color: #0b0e14;
+            color: #c3c7db;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cmd-row {
+            background: #121621;
+            border: 1px solid #1e2436;
+            transition: border-color 0.15s ease, background-color 0.15s ease;
+        }
+
+        .cmd-row:hover {
+            border-color: #3b4261;
+            background: #161b29;
+        }
+
+        .badge-everyone { background: #1b2333; color: #82aaff; border: 1px solid #2a3652; }
+        .badge-moderator { background: #182c25; color: #c3e88d; border: 1px solid #24473b; }
+        .badge-broadcaster { background: #332719; color: #ffcb6b; border: 1px solid #523f26; }
+        .badge-item4katze { background: #331f2d; color: #fca7ea; border: 1px solid #542d4a; }
+    </style>
+</head>
+<body class="min-h-screen py-12 px-4 sm:px-6">
+
+    <main class="max-w-3xl mx-auto">
+        <header class="mb-8 pb-4 border-b border-gray-800 flex justify-between items-end">
+            <div>
+                <h1 class="text-xl font-semibold text-white tracking-tight">Tasty Commands</h1>
+            </div>
+            <span class="text-xs code-font text-gray-600" id="cmdCount">0 commands</span>
+        </header>
+
+        <div id="commandsGrid" class="space-y-2.5">
+        </div>
+    </main>
+
+    <div id="toast" class="fixed bottom-6 right-6 bg-white text-black px-4 py-2.5 rounded text-xs font-semibold shadow-2xl opacity-0 transition-all duration-200 pointer-events-none transform translate-y-2 code-font">
+        Copied to clipboard!
+    </div>
+
+    <script>
+        const commands = [
+            { name: "!femboy", permission: ["Everyone"], description: "!femboy | !femboy <user>" },
+            { name: "!veiword", permission: ["Everyone"], description: "!veiword | !veiword <user>" },
+            { name: "!pp", permission: ["Everyone"], description: "!pp | !pp <user>" },
+            { name: "!weeb", permission: ["Everyone"], description: "!weeb | !weeb <user>" },
+            { name: "!gay", permission: ["Everyone"], description: "!gay | !gay <user>" },
+            { name: "!reasons", permission: ["Everyone"], description: "!reasons" },
+            { name: "!gachaemotes", permission: ["Everyone"], description: "!gachaemotes" },
+            { name: "!forsen", permission: ["Everyone"], description: "!forsen" },
+            { name: "!storage", permission: ["Everyone"], description: "!storage" },
+            { name: "!check", permission: ["Everyone"], description: "!check | !check <channel>" },
+            { name: "!slm", permission: ["Moderator"], description: "!slm restart | !slm check | !slm start mcserver" },
+            { name: "!rec", permission: ["Moderator", "item4katze"], description: "!rec <channel>" },
+            { name: "!stoprec", permission: ["Moderator", "item4katze"], description: "!stoprec <channel>" },
+            { name: "!slm stop", permission: ["Broadcaster"], description: "!slm stop" }
+        ];
+
+        const commandsGrid = document.getElementById('commandsGrid');
+        const toast = document.getElementById('toast');
+        document.getElementById('cmdCount').innerText = `${commands.length} commands`;
+
+        function getPermissionBadges(permissions) {
+            const list = Array.isArray(permissions) ? permissions : [permissions];
+
+            return list.map(permission => {
+                const p = permission.toLowerCase();
+                let badgeClass = 'badge-everyone';
+
+                if (p === 'moderator') badgeClass = 'badge-moderator';
+                if (p === 'broadcaster') badgeClass = 'badge-broadcaster';
+                if (p === 'item4katze') badgeClass = 'badge-item4katze';
+
+                return `<span class="px-2 py-0.5 rounded text-[11px] font-medium tracking-wide ${badgeClass}">${permission}</span>`;
+            }).join(' ');
+        }
+
+        function showToast(text) {
+            toast.innerText = `Copied: ${text}`;
+            toast.classList.remove('opacity-0', 'translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-2');
+            }, 1800);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast(text);
+            });
+        }
+
+        function renderCommands() {
+            commandsGrid.innerHTML = '';
+            commands.forEach(cmd => {
+                const card = document.createElement('div');
+                card.className = 'cmd-row rounded-lg p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 cursor-pointer select-none';
+                card.onclick = () => copyToClipboard(cmd.name);
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="code-font text-sm font-semibold text-white tracking-tight mr-1">
+                            ${cmd.name}
+                        </span>
+                        ${getPermissionBadges(cmd.permission)}
+                    </div>
+                    <p class="desc-text code-font text-xs text-gray-400"></p>
+                `;
+
+                card.querySelector('.desc-text').textContent = cmd.description;
+
+                commandsGrid.appendChild(card);
+            });
+        }
+
+        renderCommands();
+    </script>
+</body>
+</html>
